@@ -22,11 +22,11 @@
  > > @Before, @After의 대상 Test 메소드가 타 Class에 있을 경우 지원이 안됩니다.  
  > > 대상 Test에 TestBed와 @Before,@After가 전부 지정되어 있을 시 TestBed -> @Before -> @After -> TestBed 순으로 실행됩니다.
 
-## 3. Logger
+## 4. Logger
  Ktest의 log 출력 형식에 맞게 출력할 수 있도록 Logger를 지원합니다.
 
  
-## 2. 라이센스 및 남기는 말
+# 라이센스 및 남기는 말
 
 Ktest는 [Apache License 2.0](./LICENSE.txt) 라이센스를 이용합니다, 여러분의 적극적인 이슈, 기능 피드백을 기대합니다.
 
