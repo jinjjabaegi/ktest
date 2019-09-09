@@ -52,68 +52,11 @@ public class Ktest {
 		this.unsafeAllocator = UnsafeAllocator.create();
 	}
 
-	// project absolute path
 	public static void main(String[] args) {
-		Ktest ktest = new Ktest(args[0] + "/bin/");
+		Ktest ktest = new Ktest(args[0]);
 		ktest.setFilters(args);
 		ktest.initialize();
 		ktest.runAllTest();
-	}
-
-	private void setFilters(String[] datas) {
-		Filter curFilter = null;
-		for (String data : datas) {
-			switch (data) {
-			case "-g": {
-				curFilter = new GroupFilter();
-				this.filters.add(curFilter);
-				break;
-			}
-			case "-t": {
-				curFilter = new TestFilter();
-				this.filters.add(curFilter);
-				break;
-			}
-			case "-i": {
-				curFilter = new IgnoreFilter();
-				this.filters.add(curFilter);
-				break;
-			}
-			default: {
-				if (curFilter != null) {
-					curFilter.addTarget(data);
-				}
-				break;
-			}
-			}
-		}
-	}
-
-	public static List<String> searchClassesInDir(List<String> classes, File dir, String packagePrefix) {
-		String prefix = "";
-		if (dir.isDirectory()) {
-			if (!dir.getName().equals("bin"))
-				prefix = packagePrefix + dir.getName() + ".";
-			for (File f : dir.listFiles()) {
-				searchClassesInDir(classes, f, prefix);
-			}
-		} else {
-			String fileName = dir.getName();
-			if (!fileName.endsWith(".class"))
-				return null;
-			String className = packagePrefix + fileName.substring(0, fileName.length() - ".class".length());
-			classes.add(className);
-		}
-		return classes;
-	}
-
-	private boolean filtering(Test annotation) {
-		for (Filter filter : this.filters) {
-			if (!filter.filter(annotation)) {
-				return false;
-			}
-		}
-		return true;
 	}
 
 	private void initialize() {
@@ -121,11 +64,15 @@ public class Ktest {
 		if (file.exists()) {
 			try {
 				this.ktestClassLoader = new KtestClassLoader(new URL[] { file.toURI().toURL() }, Ktest.class.getClassLoader());
-				List<String> classNames = searchClassesInDir(new ArrayList<String>(), file, "");
+				
+				List<String> classNames = findClasses(new ArrayList<String>(), file, "");
+				
 				for (String className : classNames) {
+					Class<?> clazz = ktestClassLoader.loadClass(className);
+					Map<String, TestItem> itemMap = new HashMap<String, TestItem>();
+
 					Method defaultAfter = null;
 					Method defaultBefore = null;
-					Class<?> clazz = ktestClassLoader.loadClass(className);
 					Object instance = null;
 
 					if (TestBed.class.isAssignableFrom(clazz)) {
@@ -134,7 +81,6 @@ public class Ktest {
 						this.testBeds.put(testBed.getName(), testBed);
 					}
 
-					Map<String, TestItem> itemMap = new HashMap<String, TestItem>();
 					for (Method method : clazz.getMethods()) {
 						if (method.isAnnotationPresent(Test.class)) {
 							Test annotation = method.getAnnotation(Test.class);
@@ -239,12 +185,15 @@ public class Ktest {
 
 		for (String groupName : this.tests.keySet()) {
 			List<TestItem> testList = this.tests.get(groupName);
+			
 			testBed = this.testBeds.get(groupName);
-
-			Logger.log(LogType.GROUP, testList.size() + " tests from " + groupName + " test group");
 			groupTime = 0;
+			
+			Logger.log(LogType.GROUP, testList.size() + " tests from " + groupName + " test group");
+			
 			for (TestItem testItem : testList) {
 				result = true;
+				
 				Logger.log(LogType.START, "Run " + testItem.testName);
 
 				try {
@@ -306,5 +255,61 @@ public class Ktest {
 			totalTime += groupTime;
 		}
 		Logger.log(LogType.DEFAULT, totalTestNum + " tests ran. (" + totalTime + "ms)");
+	}
+
+	private List<String> findClasses(List<String> classes, File dir, String packagePrefix) {
+		String prefix = "";
+		if (dir.isDirectory()) {
+			if (!dir.getName().equals("bin"))
+				prefix = packagePrefix + dir.getName() + ".";
+			for (File f : dir.listFiles()) {
+				findClasses(classes, f, prefix);
+			}
+		} else {
+			String fileName = dir.getName();
+			if (!fileName.endsWith(".class"))
+				return null;
+			String className = packagePrefix + fileName.substring(0, fileName.length() - ".class".length());
+			classes.add(className);
+		}
+		return classes;
+	}
+
+	private void setFilters(String[] datas) {
+		Filter curFilter = null;
+		for (String data : datas) {
+			switch (data) {
+			case "-g": {
+				curFilter = new GroupFilter();
+				this.filters.add(curFilter);
+				break;
+			}
+			case "-t": {
+				curFilter = new TestFilter();
+				this.filters.add(curFilter);
+				break;
+			}
+			case "-i": {
+				curFilter = new IgnoreFilter();
+				this.filters.add(curFilter);
+				break;
+			}
+			default: {
+				if (curFilter != null) {
+					curFilter.addTarget(data);
+				}
+				break;
+			}
+			}
+		}
+	}
+
+	private boolean filtering(Test annotation) {
+		for (Filter filter : this.filters) {
+			if (!filter.filter(annotation)) {
+				return false;
+			}
+		}
+		return true;
 	}
 }
