@@ -277,6 +277,7 @@ public class Ktest {
 
 	private void setFilters(String[] datas) {
 		Filter curFilter = null;
+		
 		for (String data : datas) {
 			switch (data) {
 			case "-g": {
