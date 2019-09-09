@@ -12,14 +12,14 @@
  Test 환경을 설정, 해재할 수 있는 TestBed를 지원합니다. 이때 하나의 TestBed를 다수의 Test가 참조할 수 있습니다.
  
  > 참고 :
- > > TestBed는 한 개 이상의 Test가 같은 Test 환경을 갖고 있을 경우 사용하는 것을 추천합니다.
+ > > TestBed는 한 개 이상의 Test가 같은 Test 환경을 갖고 있을 경우 사용하는 것을 추천합니다.  
  > > (반대로 Test 환경이 각각 다를 경우 @Before, @After를 사용하는 것을 추천합니다.)
  
 ## 3. @Before/@After
  단일 테스트 전후에 실행되는 메소드를 지정할 수 있도록 @Before, @After Annotation을 지원합니다.
  
  > 참고 :
- > > @Before, @After의 대상 Test 메소드가 타 파일에 있을 경우 지원이 안됩니다.
+ > > @Before, @After의 대상 Test 메소드가 타 Class에 있을 경우 지원이 안됩니다.  
  > > 대상 Test에 TestBed와 @Before,@After가 전부 지정되어 있을 시 TestBed -> @Before -> @After -> TestBed 순으로 실행됩니다.
 
 ## 3. Logger
