@@ -65,7 +65,7 @@ public class Ktest {
 			try {
 				this.ktestClassLoader = new KtestClassLoader(new URL[] { file.toURI().toURL() }, Ktest.class.getClassLoader());
 				
-				List<String> classNames = findClasses(new ArrayList<String>(), file, "");
+				List<String> classNames = findClasses(new ArrayList<String>(), file, "", true);
 				
 				for (String className : classNames) {
 					Class<?> clazz = ktestClassLoader.loadClass(className);
@@ -257,13 +257,13 @@ public class Ktest {
 		Logger.log(LogType.DEFAULT, totalTestNum + " tests ran. (" + totalTime + "ms)");
 	}
 
-	private List<String> findClasses(List<String> classes, File dir, String packagePrefix) {
+	private List<String> findClasses(List<String> classes, File dir, String packagePrefix, boolean isRootFolder) {
 		String prefix = "";
 		if (dir.isDirectory()) {
-			if (!dir.getName().equals("bin"))
+			if (!isRootFolder)
 				prefix = packagePrefix + dir.getName() + ".";
 			for (File f : dir.listFiles()) {
-				findClasses(classes, f, prefix);
+				findClasses(classes, f, prefix, false);
 			}
 		} else {
 			String fileName = dir.getName();
