@@ -16,7 +16,6 @@ import com.realtimetech.ktest.annotation.Ignore;
 import com.realtimetech.ktest.annotation.Test;
 import com.realtimetech.ktest.assertion.AssertException;
 import com.realtimetech.ktest.classloader.KtestClassLoader;
-import com.realtimetech.ktest.classloader.UnsafeAllocator;
 import com.realtimetech.ktest.filter.Filter;
 import com.realtimetech.ktest.filter.GroupFilter;
 import com.realtimetech.ktest.filter.IgnoreFilter;
@@ -24,11 +23,10 @@ import com.realtimetech.ktest.filter.TestFilter;
 import com.realtimetech.ktest.logger.Logger;
 import com.realtimetech.ktest.logger.Logger.LogType;
 import com.realtimetech.ktest.testbed.TestBed;
+import com.realtimetech.reflection.allocate.UnsafeAllocator;
 
 public class Ktest {
 	private String rootPath;
-
-	private UnsafeAllocator unsafeAllocator;
 	private KtestClassLoader ktestClassLoader;
 
 	private List<Filter> filters;
@@ -49,7 +47,6 @@ public class Ktest {
 		this.tests = new HashMap<String, List<TestItem>>();
 		this.testBeds = new HashMap<String, TestBed>();
 		this.filters = new LinkedList<Filter>();
-		this.unsafeAllocator = UnsafeAllocator.create();
 	}
 
 	public static void main(String[] args) {
@@ -76,7 +73,7 @@ public class Ktest {
 					Object instance = null;
 
 					if (TestBed.class.isAssignableFrom(clazz)) {
-						instance = this.unsafeAllocator.newInstance(clazz);
+						instance = UnsafeAllocator.newInstance(clazz);
 						TestBed testBed = (TestBed) instance;
 						this.testBeds.put(testBed.getName(), testBed);
 					}
@@ -98,7 +95,7 @@ public class Ktest {
 								testGroup = "Default";
 
 							if (instance == null)
-								instance = this.unsafeAllocator.newInstance(clazz);
+								instance = UnsafeAllocator.newInstance(clazz);
 
 							testItem.test = method;
 							testItem.testName = testName;
